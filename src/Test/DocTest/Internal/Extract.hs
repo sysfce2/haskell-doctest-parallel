@@ -66,7 +66,11 @@ import           GHC.Parser.Header (getOptionsFromFile)
 #else
 import           GHC.Types.SourceError (throwErrors)
 import           GHC.Parser.Header (getOptionsFromFile)
+#if __GLASGOW_HASKELL__ < 914
 import           GHC.Driver.Config.Parser (initParserOpts)
+#else
+import           GHC.Driver.Config.Parser (initParserOpts, supportedLanguagePragmas)
+#endif
 #endif
 
 #if __GLASGOW_HASKELL__ < 904
@@ -170,8 +174,15 @@ parse modName = do
 #else
   (_, flagsFromFile) <-
 #endif
+
+#if __GLASGOW_HASKELL__ < 914
     liftIO $ getOptionsFromFile (initParserOpts dynFlags0) path
   (dynFlags1, _, _) <- parseDynamicFilePragma dynFlags0 flagsFromFile
+#else
+    liftIO $ getOptionsFromFile (initParserOpts dynFlags0) (supportedLanguagePragmas dynFlags0) path
+  logger <- getLogger
+  (dynFlags1, _, _) <- parseDynamicFilePragma logger dynFlags0 flagsFromFile
+#endif
 
 #if MIN_VERSION_ghc_exactprint(1,3,0)
   result <- parseModuleEpAnnsWithCppInternal defaultCppOptions dynFlags1 path
