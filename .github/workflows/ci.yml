@@ -55,22 +55,25 @@ jobs:
           cd example
           stack test --resolver ${{ matrix.resolver }}
 
+
+  generate-ghc-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: echo "matrix=$(jq -c '.' ghc-versions.json)" >> $GITHUB_OUTPUT
+
   # Cabal
   cabal:
     name: ${{ matrix.os }} / ${{ matrix.ghc }}
     runs-on: ${{ matrix.os }}
+    needs: generate-ghc-matrix
     strategy:
       matrix:
         os: ["macOS-latest", "windows-latest", "ubuntu-24.04"]
-        ghc:
-          - "9.14.1"
-          - "9.12.2"
-          - "9.10.2"
-          - "9.8.4"
-          - "9.6.7"
-          - "9.4.8"
-          - "9.2.8"
-          - "9.0.2"
+        ghc: ${{ fromJson(needs.generate-ghc-matrix.outputs.matrix) }}
         exclude:
           # Newer macOSs don't have the right LLVM to compile our dependencies
           - os: macOS-latest
