@@ -1,3 +1,6 @@
+# 0.4.1
+ * Add support for GHC 9.14 (thanks @alexfmpe)
+
 # 0.4
  * Account for `default-language` sections in Cabal files ([#85](https://github.com/martijnbastiaan/doctest-parallel/issues/85))
  * Add support for Cabal 3.14 ([#88](https://github.com/martijnbastiaan/doctest-parallel/pull/88))
